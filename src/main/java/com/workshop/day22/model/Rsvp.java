@@ -1,4 +1,4 @@
-package com.workshop.day22.repo;
+package com.workshop.day22.model;
 
 import java.sql.Date;
 
