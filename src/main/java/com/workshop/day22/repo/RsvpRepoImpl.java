@@ -20,7 +20,7 @@ public class RsvpRepoImpl {
     private final String findAllSQL = "select * from rsvp";
 
     // StringQuery to read names containing fred ()
-    private final String findByNameSQL = "select * from rsvp where full_name like '%'?'%'";
+    private final String findByNameSQL = "select * from rsvp where full_name like concat('%', ?, '%')";
 
     // String query for INSERT (DML)
     private final String insertSQL = """
@@ -35,18 +35,30 @@ public class RsvpRepoImpl {
 
     private final String countSQL = "select count(*) as cnt from rsvp";
 
+    private final String findByIdSQL = "select * from rsvp where id = ?";
 
+    private final String updateByEmailSQL = """
+        update rsvp 
+        set full_name = ?, email = ?, phone = ?, confirmation_date = ?, comments = ?
+        where email = ?""";
+
+
+    public Rsvp findById(Integer id) {
+        return jdbcTemplate.queryForObject(findByIdSQL, 
+            BeanPropertyRowMapper.newInstance(Rsvp.class), id);
+    }
 
     public List<Rsvp> findAll() {
-        List<Rsvp> rsvpList = jdbcTemplate.query(findAllSQL, BeanPropertyRowMapper.newInstance(Rsvp.class));
+        List<Rsvp> rsvpList = jdbcTemplate.query(findAllSQL, 
+            BeanPropertyRowMapper.newInstance(Rsvp.class));
         return rsvpList;
     }
 
     public List<Rsvp> findByName(String name) {
 
-        // "select * from rsvp where full_name like '%?%'"
-        List<Rsvp> resultList = jdbcTemplate.query(findByNameSQL, BeanPropertyRowMapper.newInstance(Rsvp.class), name);
-        // check if args parameter is valid for query(sql, mapper, args)
+        // "select * from rsvp where full_name like %?%"
+        List<Rsvp> resultList = jdbcTemplate.query(findByNameSQL, 
+            BeanPropertyRowMapper.newInstance(Rsvp.class), name);
         return resultList;
     }
 
@@ -57,8 +69,8 @@ public class RsvpRepoImpl {
         return result > 0 ? true : false;
     }
 
-    // method for update sql
-    public Boolean update(Rsvp rsvp) {
+    // method for updating sql table with rsvp input
+    public Boolean update(Rsvp rsvp, Integer id) {
         Integer result = jdbcTemplate.update(updateSQL, rsvp.getFullName(), 
             rsvp.getEmail(), rsvp.getPhone(), rsvp.getConfirmationDate(), rsvp.getComments());
         return result > 0 ? true : false;
@@ -69,6 +81,19 @@ public class RsvpRepoImpl {
         Integer result = 0;
         result = jdbcTemplate.queryForObject(countSQL, Integer.class);
         return result;
+    }
+
+    // method to update by email
+    public Boolean updateByEmail(Rsvp rsvp, String email) {
+        Integer result = jdbcTemplate.update(updateByEmailSQL, 
+            rsvp.getFullName(), 
+            rsvp.getEmail(), 
+            rsvp.getPhone(), 
+            rsvp.getConfirmationDate(), 
+            rsvp.getComments(),
+            email);
+
+        return result > 0 ? true : false;
     }
 
 }
