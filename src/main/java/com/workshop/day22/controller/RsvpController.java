@@ -93,7 +93,7 @@ public class RsvpController {
         }
     }
 
-    // update with email
+    // finds row with email, update row with rsvp (Requestbody)
     // /api/rsvps/
     @PutMapping("/{email}")
     public ResponseEntity<String> updateRsvpEmail(@PathVariable("email") String email, 
@@ -113,13 +113,17 @@ public class RsvpController {
 
     }
 
-
-    // TODO countall method
     // /api/rsvps/count
     @GetMapping("/count")
     public Integer countAll() {
         
-        return null;
+        Integer result = rsvpRepo.count();
+
+        if (null != result) {
+            return result;
+        } else {
+            return 0;
+        }
     }
 
 
